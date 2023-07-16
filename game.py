@@ -1,8 +1,22 @@
+import random
+
+
 class Character:
-    def __init__(self, name, x, y):
+    def __init__(self, name, x, y, hp):
         self.name = name
         self.x = x
         self.y = y
+        self.hp = hp
+
+    def attack(self, target):
+        damage = random.randint(10, 20)
+        target.get_damage(damage)
+
+    def get_damage(self, damage):
+        self.hp -= damage
+
+    def is_alive(self):
+        return self.hp > 0
 
 
 class Player(Character):
@@ -49,8 +63,8 @@ class Map:
 
 class Game:
     def __init__(self):
-        self.player = Player("Player", 0, 0)
-        self.enemy = Enemy("Ork", 1, 1)
+        self.player = Player("Player", 0, 0, 100)
+        self.enemy = Enemy("Ork", 1, 1, 100)
         self.game_map = Map(5, 5)
         self.hp = 100
 
@@ -59,6 +73,31 @@ class Game:
         Функция, вызываемая при начале битвы.
         """
         print("Началась битва! Вы встретили врага!")
+
+        while self.player.is_alive() and self.enemy.is_alive():
+            print(f"name {self.player.name} - hp {self.player.hp} | name {self.enemy.name} - hp {self.enemy.hp}")
+            action = input("1 - атаковать\n2 - попытаться убежать")
+            if action == "1":
+                self.player.attack(self.enemy)
+                print(f"Вы атаковали {self.enemy.name}")
+
+            # Проверка на то жив ли враг
+            if not self.enemy.is_alive():
+                print(f" {self.enemy.name}  повержен!")
+                break
+
+            # ход врага
+            self.enemy.attack(self.player)
+            print(f"{self.enemy.name} атакует {self.player.name}")
+
+            # Проверка на то жив ли игрок
+            if not self.player.is_alive():
+                print(f" {self.player.name}  повержен!")
+                break
+
+        if not self.enemy.is_alive():
+            self.enemy.x = -1
+            self.enemy.y = -1
 
     def display_map(self):
         """
